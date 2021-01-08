@@ -11,7 +11,8 @@ function initOsm(selector, latitude, longitude, zoom) {
     var target = L.latLng(latitude, longitude);
     map.setView(target, zoom);
     
-    map.on("zoom", onZoom);
+    map.on("zoomend", onZoom);
+    map.on("moveend", onMove);
     
     maps.push(map);
 }
@@ -64,3 +65,25 @@ $("#showBack").change(function() {
         $(".front").addClass("fullOpacity");
     }
 });
+
+function onMove(event) {
+    var url = "https://ms-sap.github.io/SAPCompare/#map=";
+    for (var i = 0; i < maps.length; i++) {
+        if (i == 0) {
+            url += maps[i].getZoom() +"/";
+        }
+        url += maps[i].getCenter().lat.toFixed(5) +"/"+ maps[i].getCenter().lng.toFixed(5) +"/";
+    }
+    url = url.substr(0, url.length - 1);
+    
+    window.location = url;
+}
+
+if (window.location.href.split("map=").length > 1) {
+    var coords = window.location.href.split("map=")[1].split("/");
+    for (var i = 0; i < maps.length; i++) {
+        console.log(coords[0], coords[i * 2 + 1], coords[i * 2 + 2]);
+        maps[i].setZoom(coords[0]);
+        maps[i].panTo(new L.LatLng(parseFloat(coords[i * 2 + 1]), parseFloat(coords[i * 2 + 2])));
+    }
+}
